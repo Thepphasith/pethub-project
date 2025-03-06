@@ -14,23 +14,25 @@ import AdbIcon from "@mui/icons-material/Adb";
 import FreeIcon from "../../assets/icons/logo_pethub-removebg-preview.png";
 import SearchIcon from "@mui/icons-material/Search";
 import {
-  ARTICLE_PATH,
-  COMPANY_SEARCH_PATH,
+  BLOG_PATH,
   HOME_PATH,
-  JOB_PATH,
-  LOGIN_PATH,
+  ADOPT_PATH,
 } from "../../routes/path";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Button, Grid, InputAdornment, TextField } from "@mui/material";
+import {
+  Button,
+  Grid,
+  InputAdornment,
+  TextField,
+} from "@mui/material";
+import LoginDialog from "../components/dialog-login";
 
-// const pages = ["Home", "Job Search", "Company Search", "Article"];
+// Modified pages array - removed LOGIN_PATH
 const pages = [
   { to: HOME_PATH, label: "Home" },
-  { to: JOB_PATH, label: "Job Search" },
-  { to: COMPANY_SEARCH_PATH, label: "Company Search" },
-  { to: ARTICLE_PATH, label: "Articles" },
-  { to: LOGIN_PATH, label: "Log in", isLogin: true },
+  { to: ADOPT_PATH, label: "Adopt" },
+  { to: BLOG_PATH, label: "Blog" },
 ];
 const settings = ["Profile", "Account", "Dashboard", "Logout"];
 
@@ -42,6 +44,10 @@ function ResponsiveAppBar() {
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
     null
   );
+  // New state for login dialog
+  const [loginDialogOpen, setLoginDialogOpen] = React.useState(false);
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
@@ -58,114 +64,120 @@ function ResponsiveAppBar() {
     setAnchorElUser(null);
   };
 
+  // Login dialog handlers
+  const handleOpenLoginDialog = () => {
+    setLoginDialogOpen(true);
+  };
+
+  const handleCloseLoginDialog = () => {
+    setLoginDialogOpen(false);
+    setEmail("");
+    setPassword("");
+  };
+
+  const handleLogin = () => {
+    // Handle login logic here
+    console.log("Logging in with:", email, password);
+    // After successful login, close dialog
+    handleCloseLoginDialog();
+  };
+
   useEffect(() => {
     setCurrentPath(location.pathname);
   }, [location.pathname]);
 
   return (
-    <AppBar position="static" sx={{ bgcolor: "white" }}>
-      <Container maxWidth="xl">
-        <Toolbar disableGutters>
-          <Box
-            sx={{
-              display: { xs: "none", md: "flex" },
-              width: "70px",
-              height: "70px",
-              mr: 2,
-            }}
-          >
-            <img
-              src={FreeIcon}
-              alt=""
-              style={{ width: "100% ", height: "100%" }}
-            />
-          </Box>
-          <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
-            <IconButton
-              size="large"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleOpenNavMenu}
-              color="primary"
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorElNav}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "left",
-              }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
+    <>
+      <AppBar position="static" sx={{ bgcolor: "white" }}>
+        <Container maxWidth="xl">
+          <Toolbar disableGutters>
+            <Box
               sx={{
-                display: { xs: "block", md: "none" },
+                display: { xs: "none", md: "flex" },
+                width: "70px",
+                height: "70px",
+                mr: 2,
+              }}
+            >
+              <img
+                src={FreeIcon}
+                alt=""
+                style={{ width: "100% ", height: "100%" }}
+              />
+            </Box>
+            <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
+              <IconButton
+                size="large"
+                aria-label="account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                onClick={handleOpenNavMenu}
+                color="primary"
+              >
+                <MenuIcon />
+              </IconButton>
+              <Menu
+                id="menu-appbar"
+                anchorEl={anchorElNav}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "left",
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "left",
+                }}
+                open={Boolean(anchorElNav)}
+                onClose={handleCloseNavMenu}
+                sx={{
+                  display: { xs: "block", md: "none" },
+                }}
+              >
+                {pages.map((page) => (
+                  <MenuItem key={page.to} onClick={handleCloseNavMenu}>
+                    <Typography textAlign="center">{page.label}</Typography>
+                  </MenuItem>
+                ))}
+                <MenuItem
+                  onClick={() => {
+                    handleCloseNavMenu();
+                    handleOpenLoginDialog();
+                  }}
+                >
+                  <Typography textAlign="center">Log in</Typography>
+                </MenuItem>
+              </Menu>
+            </Box>
+            <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
+            <Typography
+              variant="h5"
+              noWrap
+              component="a"
+              href="#app-bar-with-responsive-menu"
+              sx={{
+                mr: 2,
+                display: { xs: "flex", md: "none" },
+                flexGrow: 1,
+                fontFamily: "monospace",
+                fontWeight: 700,
+                letterSpacing: ".3rem",
+                color: "black",
+                textDecoration: "none",
+              }}
+            >
+              Freelance
+            </Typography>
+            <Box
+              sx={{
+                flexGrow: 1,
+                display: { xs: "none", md: "flex" },
+                justifyContent: "flex-end",
+                gap: 4,
+                px: 2,
               }}
             >
               {pages.map((page) => (
-                <MenuItem key={page.to} onClick={handleCloseNavMenu}>
-                  <Typography textAlign="center">{page.label}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
-          <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
-          <Typography
-            variant="h5"
-            noWrap
-            component="a"
-            href="#app-bar-with-responsive-menu"
-            sx={{
-              mr: 2,
-              display: { xs: "flex", md: "none" },
-              flexGrow: 1,
-              fontFamily: "monospace",
-              fontWeight: 700,
-              letterSpacing: ".3rem",
-              color: "black",
-              textDecoration: "none",
-            }}
-          >
-            Freelance
-          </Typography>
-          <Box
-            sx={{
-              flexGrow: 1,
-              display: { xs: "none", md: "flex" },
-              justifyContent: "flex-end",
-              gap: 4,
-              px: 2,
-            }}
-          >
-            {pages.map((page) =>
-              page.isLogin ? (
-                <Button
-                  key={page.to}
-                  component={Link}
-                  to={page.to}
-                  onClick={handleCloseNavMenu}
-                  variant="contained"
-                  sx={{
-                    backgroundColor: "#0067bc",
-                    color: "white",
-                    "&:hover": {
-                      backgroundColor: "#005499",
-                    },
-                    textTransform: "none",
-                    borderRadius: "20px",
-                    padding: "6px 16px",
-                  }}
-                >
-                  {page.label}
-                </Button>
-              ) : (
                 <Link
                   key={page.to}
                   to={page.to}
@@ -200,81 +212,100 @@ function ResponsiveAppBar() {
                     }}
                   />
                 </Link>
-              )
-            )}
-          </Box>
-
-          <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
-              </IconButton>
-            </Tooltip>
-            <Menu
-              sx={{ mt: "45px" }}
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-            >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">{setting}</Typography>
-                </MenuItem>
               ))}
-            </Menu>
-          </Box>
-        </Toolbar>
-      </Container>
-      <Box
-        sx={{
-          bgcolor: "#5D4FC3",
-          display: "flex",
-          width: "100%",
-          justifyContent: "flex-end",
-          minHeight: 50,
-        }}
-      >
-        <Grid sx={{ px: 20, alignItems: "center", display: "flex" }}>
-          <TextField
-            placeholder="Search..."
-            variant="standard"
-            sx={{
-              bgcolor: "white",
-              borderRadius: "10px",
-              "& .MuiInput-underline:before": {
-                borderBottom: "none",
-              },
-              "& .MuiInput-underline:after": {
-                borderBottom: "none",
-              },
-              "& .MuiInput-underline:hover:not(.Mui-disabled):before": {
-                borderBottom: "none",
-              },
-            }}
-            InputProps={{
-              style: {
-                height: 40,
-              },
-              startAdornment: (
-                <InputAdornment position="end">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
-      </Box>
-    </AppBar>
+              {/* Login button that opens dialog instead of navigating */}
+              <Button
+                onClick={handleOpenLoginDialog}
+                variant="contained"
+                sx={{
+                  backgroundColor: "#0067bc",
+                  color: "white",
+                  "&:hover": {
+                    backgroundColor: "#005499",
+                  },
+                  textTransform: "none",
+                  borderRadius: "20px",
+                  padding: "6px 16px",
+                }}
+              >
+                Log in
+              </Button>
+            </Box>
+
+            <Box sx={{ flexGrow: 0 }}>
+              <Tooltip title="Open settings">
+                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                  <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                </IconButton>
+              </Tooltip>
+              <Menu
+                sx={{ mt: "45px" }}
+                id="menu-appbar"
+                anchorEl={anchorElUser}
+                anchorOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                open={Boolean(anchorElUser)}
+                onClose={handleCloseUserMenu}
+              >
+                {settings.map((setting) => (
+                  <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                    <Typography textAlign="center">{setting}</Typography>
+                  </MenuItem>
+                ))}
+              </Menu>
+            </Box>
+          </Toolbar>
+        </Container>
+        <Box
+          sx={{
+            bgcolor: "#5D4FC3",
+            display: "flex",
+            width: "100%",
+            justifyContent: "flex-end",
+            minHeight: 50,
+          }}
+        >
+          <Grid sx={{ px: 20, alignItems: "center", display: "flex" }}>
+            <TextField
+              placeholder="Search..."
+              variant="standard"
+              sx={{
+                bgcolor: "white",
+                borderRadius: "10px",
+                "& .MuiInput-underline:before": {
+                  borderBottom: "none",
+                },
+                "& .MuiInput-underline:after": {
+                  borderBottom: "none",
+                },
+                "& .MuiInput-underline:hover:not(.Mui-disabled):before": {
+                  borderBottom: "none",
+                },
+              }}
+              InputProps={{
+                style: {
+                  height: 40,
+                },
+                startAdornment: (
+                  <InputAdornment position="end">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Grid>
+        </Box>
+      </AppBar>
+
+      <LoginDialog open={loginDialogOpen} onClose={handleCloseLoginDialog} />
+    </>
   );
 }
 export default ResponsiveAppBar;
