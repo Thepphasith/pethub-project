@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 import RecommendJob from "./components/TakeMore";
-import FindJobPage from "./components/find_job";
+import FindJobPage from "./components/Blog";
 import SponsorPages from "./components/sponsorSection";
 import CompaniesHiringPages from "./components/companiesHiring";
 import HeaderPage from "./components/header";
