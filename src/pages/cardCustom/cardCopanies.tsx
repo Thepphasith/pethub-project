@@ -1,120 +1,90 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Card, CardContent, Skeleton } from '@mui/material';
 
-import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
-import WorkOutlineIcon from "@mui/icons-material/WorkOutline";
-
-import Image from "../../assets/icons/image.png";
-import Logo1 from "../../assets/icons/TOA.png";
-
-
-const CardComapanies = () => {
+const BlogCardSkeleton = () => {
   return (
-    <Box
+    <Card 
       sx={{
-        maxWidth: 350,
-        borderRadius: "20px 20px 20px 20px",
-        overflow: "hidden",
-        mt: 5,
-        boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Optional: Added box shadow
+        minWidth: 280,
+        maxWidth: 300,
+        mx: 1,
+        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+        borderRadius: 2,
+        flexShrink: 0, // Prevent card from shrinking in the flex container
       }}
     >
-      <Box
-        sx={{
-          backgroundImage: `url(${Image})`,
-          height: 130,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          display: "flex",
-          justifyContent: "center",
-        }}
-      >
-        <Box
-          sx={{
-            width: 60,
-            height: 60,
-            borderRadius: 2,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            border: "1px solid gray",
-            bgcolor: "white",
-            position: "relative",
-            top: 105,
-          }}
-        >
-          <img
-            style={{ borderRadius: 10 }}
-            width={40}
-            height={40}
-            src={Logo1}
-            alt=""
+      {/* Image placeholder */}
+      <Skeleton 
+        variant="rectangular" 
+        height={160} 
+        width="100%"
+        animation="wave"
+      />
+      
+      <CardContent>
+        {/* Title placeholder */}
+        <Skeleton 
+          variant="text" 
+          height={32}
+          width="90%"
+          animation="wave"
+          sx={{ mb: 1 }}
+        />
+        <Skeleton 
+          variant="text" 
+          height={20}
+          width="40%"
+          animation="wave"
+          sx={{ mb: 1.5 }}
+        />
+        
+        {/* Content placeholders */}
+        <Skeleton 
+          variant="text" 
+          height={16}
+          width="100%"
+          animation="wave"
+        />
+        <Skeleton 
+          variant="text" 
+          height={16}
+          width="90%"
+          animation="wave"
+        />
+        <Skeleton 
+          variant="text" 
+          height={16}
+          width="95%"
+          animation="wave"
+          sx={{ mb: 2 }}
+        />
+        
+        {/* Author and date placeholders */}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Skeleton 
+              variant="circular" 
+              width={32} 
+              height={32}
+              animation="wave"
+            />
+            <Skeleton 
+              variant="text" 
+              height={16}
+              width={80}
+              animation="wave"
+              sx={{ ml: 1 }}
+            />
+          </Box>
+          <Skeleton 
+            variant="text" 
+            height={14}
+            width={60}
+            animation="wave"
           />
         </Box>
-      </Box>
-
-      <Box sx={{ height: 40 }}></Box>
-
-      <Box sx={{ p: 2 }}>
-        <Typography textAlign={"center"} fontWeight={700} fontSize={16}>
-          TOA Paint(Laos) Sole co.,Ltd
-        </Typography>
-
-        <Typography
-          textAlign={"center"}
-          fontSize={13}
-          color="#6E6E73"
-          sx={{
-            display: "-webkit-box",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            WebkitLineClamp: 1,
-            WebkitBoxOrient: "vertical",
-          }}
-        >
-          <WorkOutlineIcon sx={{ color: "#6E6E73", fontSize: 16 }} /> Marketing
-        </Typography>
-
-        <Typography
-          textAlign={"center"}
-          fontSize={13}
-          color="#6E6E73"
-          sx={{
-            display: "-webkit-box",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            WebkitLineClamp: 1,
-            WebkitBoxOrient: "vertical",
-          }}
-        >
-          <LocationOnOutlinedIcon sx={{ color: "#6E6E73", fontSize: 16 }} />{" "}
-          Vientiane Province, Oudomxay Province, Bokeo
-        </Typography>
-      </Box>
-
-      <Box
-        sx={{
-          minHeight: 80,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Button
-          fullWidth
-          sx={{
-            bgcolor: "#E6F3FF",
-            color: "#0067BC",
-            minHeight: 50,
-            maxWidth: 130,
-            borderRadius: 10,
-            textTransform: "none",
-          }}
-        >
-          View 3 Jobs
-        </Button>
-      </Box>
-    </Box>
+      </CardContent>
+    </Card>
   );
 };
 
-export default CardComapanies;
+export default BlogCardSkeleton;

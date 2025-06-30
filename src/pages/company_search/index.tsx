@@ -1,15 +1,22 @@
 import { Box } from "@mui/material"
-import TextFieldSearchCompany from "./components/TextFieldSearchCompany"
+import PetBlog from "./components/BlogPage";
 
-const Company_searchPage = () => {
-  
+
+const PetBlogPage = () => {
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', bgcolor: '#0067BC'}}>
-      <Box sx={{ maxWidth: 1300, width: '100%'}}>
-        <TextFieldSearchCompany  />
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        bgcolor: "",
+      }}
+    >
+      <Box sx={{ maxWidth: 1300, width: "100%" }}>
+        <PetBlog/>
       </Box>
     </Box>
-  )
-}
+  );
+};
 
-export default Company_searchPage
+export default PetBlogPage;

@@ -5,23 +5,32 @@ import Footer from "./footer";
 
 export default function MainLayout() {
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+    <Box 
+      sx={{ 
+        display: "flex", 
+        flexDirection: "column", 
+        minHeight: "100vh",
+        backgroundColor: "#f8f9fa" // Light background for modern feel
+      }}
+    >
       <ResponsiveAppBar />
+      
       <Box
+        component="main"
         sx={{
           flexGrow: 1,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
           width: "100%",
+          maxWidth: "1440px", // Controlled maximum width for large screens
           marginX: "auto",
+          paddingX: { xs: 2, sm: 3, md: 4 }, // Responsive padding
+          paddingY: { xs: 2, md: 3 },
+          display: "flex",
+          flexDirection: "column"
         }}
       >
-        <Box sx={{ flexGrow: 1, width: "100%", mt: { md: 2.5, xs: 1 } }}>
-          <Outlet />
-        </Box>
+        <Outlet />
       </Box>
-
+      
       <Footer />
     </Box>
   );

@@ -1,80 +1,76 @@
-import { Box } from "@mui/material";
-import RoutesComponent from "./routes";
+import { useEffect } from "react";
 import "./App.css";
-import axios from "axios";
+import RoutesComponent from "./routes";
 import { useDispatch } from "react-redux";
-import { clearUserData, loginSuccess } from "./store/slices/userSlice";
+import { loginFailed, loginSuccess } from "./store/authenticationSlice";
+import axiosInstance from "./configs/axios";
+import { getUserByToken, refreshAuthToken } from "./services/Login";
+
+
 function App() {
   const dispatch = useDispatch();
 
-  interface AuthToken {
-    accessToken: string;
-    refreshToken: string;
-  }
-
-  const handleLoginWithToken = async () => {
+  // handleLoginByToken in App.tsx
+  const handleLoginByToken = async () => {
     try {
-      const authTokenString = localStorage.getItem("authToken");
-      if (!authTokenString) {
-        throw new Error("No auth token found");
+      const authString = localStorage.getItem("auth");
+      if (!authString) {
+        dispatch(loginFailed());
+        return;
       }
 
-      const authToken: AuthToken = JSON.parse(authTokenString);
-      axios.defaults.headers.common[
-        "Authorization"
-      ] = `Bearer ${authToken.accessToken}`;
+      const authData = JSON.parse(authString);
+      const accessToken = authData.accessToken;
+      const refreshToken = authData.refreshToken;
 
-      const resGetData = await axios.get("/auth/login");
-      dispatch(loginSuccess(resGetData.data));
+      if (!accessToken || !refreshToken) {
+        dispatch(loginFailed());
+        return;
+      }
+
+      try {
+        // First try using the existing access token
+        axiosInstance.defaults.headers.common[
+          "Authorization"
+        ] = `Bearer ${accessToken}`;
+        const user = await getUserByToken();
+        dispatch(loginSuccess(user));
+      } catch (error) {
+        // If that fails, try refreshing the token
+        const newTokens = await refreshAuthToken(refreshToken);
+        if (newTokens) {
+          // Update the stored auth data with new tokens
+          authData.accessToken = newTokens.accessToken;
+          authData.refreshToken = newTokens.refreshToken;
+          localStorage.setItem("auth", JSON.stringify(authData));
+
+          // Set the new access token for API calls
+          axiosInstance.defaults.headers.common[
+            "Authorization"
+          ] = `Bearer ${newTokens.accessToken}`;
+
+          // Fetch user data with new token
+          const user = await getUserByToken();
+          dispatch(loginSuccess(user));
+        } else {
+          dispatch(loginFailed());
+        }
+      }
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.status === 401) {
-        await handleTokenRefresh();
-      } else {
-        console.error("Login failed:", err);
-        dispatch(clearUserData());
-      }
+      console.error("Error in handleLoginByToken:", err);
+      dispatch(loginFailed());
     }
   };
 
-  const handleTokenRefresh = async () => {
-    try {
-      const authTokenString = localStorage.getItem("authToken");
-      if (!authTokenString) {
-        throw new Error("No auth token found for refresh");
-      }
-
-      const authToken: AuthToken = JSON.parse(authTokenString);
-      axios.defaults.headers.common[
-        "Authorization"
-      ] = `Bearer ${authToken.refreshToken}`;
-
-      const res = await axios.post("/contact/refreshToken");
-      const newAccessToken = res.data.access_token;
-
-      const newAuthToken: AuthToken = {
-        accessToken: newAccessToken,
-        refreshToken: authToken.refreshToken,
-      };
-
-      localStorage.setItem("authToken", JSON.stringify(newAuthToken));
-      axios.defaults.headers.common[
-        "Authorization"
-      ] = `Bearer ${newAccessToken}`;
-
-      // Retry the original request
-      const resGetData = await axios.get("/auth/login");
-      dispatch(loginSuccess(resGetData.data));
-    } catch (err) {
-      console.error("Token refresh failed:", err);
-      dispatch(clearUserData());
-    }
-  };
-
+  useEffect(() => {
+    handleLoginByToken();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
-    <Box>
-      <RoutesComponent />
-    </Box>
+    <>
+      <RoutesComponent/>
+    </>
   );
 }
 
