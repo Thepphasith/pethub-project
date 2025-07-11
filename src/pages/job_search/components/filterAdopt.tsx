@@ -60,7 +60,7 @@ interface Pet {
 interface Breed {
   id: string;
   breedName: string;
-  animalType: string; // "DOG" or "CAT"
+  type: string; // "DOG" or "CAT" - changed from animalType to type based on API
   // other breed properties...
 }
 
@@ -98,8 +98,8 @@ const filterCategories: FilterCategory[] = [
 
 // Animal options
 const animalOptions: FilterOption[] = [
-  { id: "cat", name: "ແມວ", icon: <CatIcon />, type: "cat" },
-  { id: "dog", name: "ໝາ", icon: <DogIcon />, type: "dog" },
+  { id: "CAT", name: "ແມວ", icon: <CatIcon />, type: "CAT" }, // Changed to match API format
+  { id: "DOG", name: "ໝາ", icon: <DogIcon />, type: "DOG" }, // Changed to match API format
 ];
 
 // Static data options (updated to match API exactly)
@@ -146,13 +146,20 @@ const FilterComponent: React.FC<FilterComponentProps> = ({
       setBreedsLoading(true);
       setBreedsError("");
       
+      console.log("Fetching breeds from API...");
       const response = await axiosInstance.get("/breed");
       
-      if (response.data && response.data.data) {
+      console.log("API Response:", response.data);
+      
+      if (response.data && Array.isArray(response.data)) {
+        setBreeds(response.data);
+        console.log("Fetched breeds:", response.data);
+      } else if (response.data && response.data.data && Array.isArray(response.data.data)) {
         setBreeds(response.data.data);
-        console.log("Fetched breeds:", response.data.data);
+        console.log("Fetched breeds from data property:", response.data.data);
       } else {
-        setBreeds(response.data || []);
+        console.warn("Unexpected API response format:", response.data);
+        setBreeds([]);
       }
     } catch (error) {
       console.error("Error fetching breeds:", error);
@@ -172,16 +179,20 @@ const FilterComponent: React.FC<FilterComponentProps> = ({
   const getCurrentBreeds = () => {
     if (!filterState.animalType) return [];
     
-    const animalTypeMap = {
-      "cat": "CAT",
-      "dog": "DOG"
-    };
+    console.log("Getting breeds for animal type:", filterState.animalType);
+    console.log("Available breeds:", breeds);
     
-    const targetType = animalTypeMap[filterState.animalType as keyof typeof animalTypeMap];
+    const filteredBreeds = breeds.filter(breed => {
+      // Try both 'type' and 'animalType' properties to be safe
+      const breedType = breed.type || breed.animalType;
+      const matches = breedType?.toUpperCase() === filterState.animalType.toUpperCase();
+      
+      console.log(`Breed: ${breed.breedName}, Type: ${breedType}, Matches: ${matches}`);
+      return matches;
+    });
     
-    return breeds.filter(breed => 
-      breed.animalType?.toUpperCase() === targetType
-    );
+    console.log("Filtered breeds:", filteredBreeds);
+    return filteredBreeds;
   };
 
   // Calculate active filters count
@@ -206,6 +217,7 @@ const FilterComponent: React.FC<FilterComponentProps> = ({
 
   // Reset breed selections when animal type changes
   useEffect(() => {
+    console.log("Animal type changed to:", filterState.animalType);
     setFilterState(prev => ({ ...prev, breeds: [] }));
   }, [filterState.animalType]);
 
@@ -213,13 +225,9 @@ const FilterComponent: React.FC<FilterComponentProps> = ({
   const buildQueryParams = (filters: FilterState): URLSearchParams => {
     const params = new URLSearchParams();
     
-    // Add pet type (convert to backend format)
+    // Add pet type (already in correct format)
     if (filters.animalType) {
-      const petTypeMap = {
-        "cat": "CAT",
-        "dog": "DOG"
-      };
-      params.append("petType", petTypeMap[filters.animalType as keyof typeof petTypeMap]);
+      params.append("petType", filters.animalType);
     }
     
     // Add multiple values for each filter category
@@ -234,6 +242,7 @@ const FilterComponent: React.FC<FilterComponentProps> = ({
 
   // Handler functions
   const handleAnimalSelect = (animalType: string) => {
+    console.log("Selecting animal type:", animalType);
     setFilterState(prev => ({ ...prev, animalType }));
   };
 
@@ -332,8 +341,8 @@ const FilterComponent: React.FC<FilterComponentProps> = ({
                     <Grid item key={breed.id}>
                       <Chip
                         label={breed.breedName}
-                        onClick={() => handleToggleFilter("breeds", breed.id)} // Use breed.id instead of breed.breedName
-                        variant={filterState.breeds.includes(breed.id) ? "filled" : "outlined"} // Check breed.id instead of breed.breedName
+                        onClick={() => handleToggleFilter("breeds", breed.id)}
+                        variant={filterState.breeds.includes(breed.id) ? "filled" : "outlined"}
                         size="small"
                         sx={{
                           borderRadius: 1.5,
@@ -730,7 +739,7 @@ const FilterComponent: React.FC<FilterComponentProps> = ({
                             variant="caption"
                             sx={{ ml: 0.5, color: "text.secondary" }}
                           >
-                            ({filterState.animalType === "dog" ? "Dog" : "Cat"})
+                            ({filterState.animalType === "DOG" ? "Dog" : "Cat"})
                           </Typography>
                         )}
                       </Typography>
@@ -843,7 +852,7 @@ const FilterComponent: React.FC<FilterComponentProps> = ({
                  ປະເພດຂອງສັດ:
                 </Typography>
                 <Chip
-                  label={filterState.animalType.charAt(0).toUpperCase() + filterState.animalType.slice(1)}
+                  label={filterState.animalType}
                   size="small"
                   sx={{
                     bgcolor: themeColors.primaryLight,

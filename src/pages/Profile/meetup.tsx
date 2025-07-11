@@ -1282,8 +1282,8 @@ const MeetupManagementTable: React.FC = () => {
               },
             }}
           >
-            <Tab label="ຜູ້ຊື້" value="seller" />
-            <Tab label="ຜູ້ຂາຍ" value="buyer" />
+            <Tab label="ຜູ້ຊີ້" value="buyer" />
+            <Tab label="ຜູ້ຂາຍ" value="seller" />
             
           </Tabs>
         </Box>

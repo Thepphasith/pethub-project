@@ -306,9 +306,7 @@ const BlogPostCard = ({ blog, profileData }: { blog: Blog; profileData: ProfileD
 
       {/* Post Footer */}
       <Box sx={{ p: 2 }}>
-        <Typography variant="caption" color="primary" sx={{ cursor: 'pointer' }}>
-          ຄອມເມັ້ນ
-        </Typography>
+
       </Box>
     </Paper>
   );
@@ -664,9 +662,6 @@ const UserProfilePage = () => {
   return (
     <ThemeProvider theme={theme}>
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom sx={{ mb: 4, fontWeight: 700 }}>
-          User Profile
-        </Typography>
         
         <Grid container spacing={3}>
           {/* Tab navigation */}
@@ -678,8 +673,8 @@ const UserProfilePage = () => {
                 variant="fullWidth"
                 aria-label="profile navigation tabs"
               >
-                <Tab label="Profile" icon={<Person />} iconPosition="start" />
-                <Tab label={`Pets (${pets.length})`} icon={<Pets />} iconPosition="start" />
+                <Tab label="ໂປຣໄຟລ" icon={<Person />} iconPosition="start" />
+                <Tab label={`ສັດ (${pets.length})`} icon={<Pets />} iconPosition="start" />
               </Tabs>
             </Paper>
           </Grid>
@@ -763,7 +758,7 @@ const UserProfilePage = () => {
             <TabPanel value={tabValue} index={1}>
               <Paper elevation={1} sx={{ p: 4, borderRadius: 4 }}>
                 <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
-                  My Pets ({pets.length})
+                  ສັັດ ({pets.length})
                 </Typography>
                 
                 {loading.pets ? (
