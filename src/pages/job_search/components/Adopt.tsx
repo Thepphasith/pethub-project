@@ -122,7 +122,13 @@ const PetAdoptionPage: React.FC = () => {
       setPetsError("");
       
       console.log("Fetching all pets...");
-      const response = await axiosInstance.get<PetApiResponse>("/pets/all");
+      const response = await axiosInstance.get<PetApiResponse>("/pets/all",
+        {
+          params:{
+            status: "AVAILABLE"
+          }
+        }
+      );
       
       if (response.data && response.data.data) {
         setAllPets(response.data.data);

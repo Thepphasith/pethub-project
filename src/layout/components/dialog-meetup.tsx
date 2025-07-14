@@ -50,6 +50,7 @@
     scheduledDateTime: string;
     link: string;
     status: string;
+    isMeetUp?: boolean;
   }
 
   interface MeetupDialogProps {
@@ -242,7 +243,8 @@
         locationDetails: meetupDetails.location,
         scheduledDateTime: getScheduledDateTime(),
         link: meetupDetails.mapLink || "",
-        status: "PENDING"
+        status: "PENDING",
+        isMeetUp: true 
       };
     };
 
@@ -257,8 +259,6 @@
           }
         });
         
-        // Axios automatically throws for error status codes,
-        // but we'll check anyway for clarity
         if (response.status >= 200 && response.status < 300) {
           return true;
         } else {

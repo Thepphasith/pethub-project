@@ -917,6 +917,36 @@ const PetDetail: React.FC = () => {
               {data?.bio || `${data.petName} ເປັນສັດລ້ຽງທີ່ໜ້າຮັກ (ພັນ ${data.breed?.breedName || "ບໍ່ຮູ້ຈັກ"}) ກຳລັງຊອກຫາເຮືອນຖາວອນ. ${data.gender === Gender.MALE ? 'ລາວ' : 'ມັນ'} ເປັນມິດຫຼາຍ ແລະ ຈະເປັນເພື່ອນທີ່ດີເລີດ.`}
             </Typography>
           </Card>
+
+          <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}>
+            <Box>
+              <Button onClick={() => navigate(`/user-profile/${data?.user?.id}`)} sx={{ bgcolor: "#9990DA", color: 'white', textTransform: "none", fontWeight: 700, borderRadius: 6, width: "100%", mb: 2 }}>
+                เບິ່ງໂປຮຟາຍຜູ້ຂາຍສັດລ້ຽງ
+                <ArrowForwardIosRoundedIcon sx={{ ml: 1 }} />
+              </Button>
+            </Box>
+           <Box>
+            <Button
+  onClick={() => window.open(data?.documentImages[0], '_blank')}
+  sx={{
+    borderRadius: 6,
+    backgroundColor: "#9990DA",
+    fontWeight: 700,
+    width: "100%",
+    color: 'white',
+    textTransform: "none",
+    boxShadow: "0 4px 14px rgba(153, 144, 218, 0.4)",
+    "&:hover": {
+      backgroundColor: "#8278c7",
+      boxShadow: "0 6px 20px rgba(153, 144, 218, 0.5)",
+    },
+  }}
+>
+  ເບິ່ງລາຍລະອຽດເອກະສານສັດລ້ຽງ
+</Button>
+           </Box>
+
+          </Box>
         </Grid>
 
         {/* Right Column - Info */}

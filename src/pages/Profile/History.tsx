@@ -23,7 +23,10 @@ import {
   CircularProgress,
   Snackbar,
   Alert,
-  IconButton
+  IconButton,
+  Collapse,
+  Divider,
+  Grid
 } from "@mui/material";
 import {
   Search as SearchIcon,
@@ -34,7 +37,13 @@ import {
   Pets as PetsIcon,
   CalendarMonth as CalendarIcon,
   MoreVert as MoreVertIcon,
-  Refresh as RefreshIcon
+  Refresh as RefreshIcon,
+  KeyboardArrowDown as KeyboardArrowDownIcon,
+  KeyboardArrowUp as KeyboardArrowUpIcon,
+  AttachMoney as AttachMoneyIcon,
+  Person as PersonIcon,
+  AccessTime as AccessTimeIcon,
+  Info as InfoIcon
 } from "@mui/icons-material";
 import { format } from "date-fns";
 import axiosInstance from "../../configs/axios";
@@ -42,6 +51,9 @@ import axiosInstance from "../../configs/axios";
 // Interface for meet-up data from API
 export interface AdoptionSchedule {
   petId: string;
+  pet?: {
+    petName?: string;
+  }
   locationDetails: string;
   scheduledDateTime: string; // ISO string format like "2021-09-01T00:00:00.000Z"
   status: string; // "PENDING" | "APPROVED" | "REJECTED" 
@@ -60,10 +72,268 @@ interface ApiResponse {
   totalMeetUps?: number;
 }
 
+// Component for expandable row
+const ExpandableRow: React.FC<{ meetUp: AdoptionSchedule }> = ({ meetUp }) => {
+  const [open, setOpen] = useState(false);
+
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return format(date, "dd MMM yyyy, HH:mm");
+    } catch (err) {
+      return dateString;
+    }
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(amount);
+  };
+
+  return (
+    <>
+      <TableRow
+        sx={{
+          transition: "all 0.2s",
+          "&:hover": {
+            bgcolor: "rgba(132, 112, 192, 0.05)"
+          },
+          cursor: "pointer"
+        }}
+        onClick={() => setOpen(!open)}
+      >
+        <TableCell sx={{ fontWeight: 600, color: "#8470C0" }}>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Avatar
+              sx={{
+                width: 36,
+                height: 36,
+                mr: 1.5,
+                border: "2px solid #f0f0f0",
+                bgcolor: "#8470C0"
+              }}
+            >
+              <PetsIcon fontSize="small" />
+            </Avatar>
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: 600,
+                maxWidth: "180px",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap"
+              }}
+            >
+              {meetUp?.pet?.petName}
+            </Typography>
+          </Box>
+        </TableCell>
+        <TableCell>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <LocationIcon
+              fontSize="small"
+              sx={{ color: "#666", mr: 1 }}
+            />
+            <Typography
+              variant="body2"
+              sx={{
+                color: "#666",
+                maxWidth: "120px",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap"
+              }}
+            >
+              {meetUp.locationDetails}
+            </Typography>
+          </Box>
+        </TableCell>
+        <TableCell>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <CalendarIcon
+              fontSize="small"
+              sx={{ color: "#666", mr: 1 }}
+            />
+            <Typography
+              variant="body2"
+              sx={{ color: "#666" }}
+            >
+              {formatDate(meetUp.scheduledDateTime)}
+            </Typography>
+          </Box>
+        </TableCell>
+        <TableCell>
+          <Chip
+            label={meetUp.status}
+            size="small"
+            color={
+              meetUp.status === "PENDING"
+                ? "primary"
+                : meetUp.status === "APPROVED"
+                  ? "success"
+                  : "error"
+            }
+            sx={{
+              bgcolor:
+                meetUp.status === "PENDING"
+                  ? "rgba(132, 112, 192, 0.1)"
+                  : meetUp.status === "APPROVED"
+                    ? "rgba(76, 175, 80, 0.1)"
+                    : "rgba(244, 67, 54, 0.1)",
+              color:
+                meetUp.status === "PENDING"
+                  ? "#8470C0"
+                  : meetUp.status === "APPROVED"
+                    ? "#4caf50"
+                    : "#f44336",
+              fontWeight: 500,
+              borderRadius: "12px",
+              fontSize: "0.75rem",
+              height: "24px"
+            }}
+          />
+        </TableCell>
+        <TableCell>
+          <IconButton
+            aria-label="expand row"
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpen(!open);
+            }}
+            sx={{
+              color: "#8470C0",
+              transition: "transform 0.2s",
+              transform: open ? "rotate(180deg)" : "rotate(0deg)"
+            }}
+          >
+            <KeyboardArrowDownIcon />
+          </IconButton>
+        </TableCell>
+      </TableRow>
+      <TableRow>
+        <TableCell
+          style={{ paddingBottom: 0, paddingTop: 0 }}
+          colSpan={5}
+        >
+          <Collapse in={open} timeout="auto" unmountOnExit>
+            <Box sx={{ margin: 2 }}>
+              <Card
+                elevation={0}
+                sx={{
+                  bgcolor: "rgba(132, 112, 192, 0.02)",
+                  border: "1px solid rgba(132, 112, 192, 0.1)",
+                  borderRadius: "12px"
+                }}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                    <InfoIcon sx={{ color: "#8470C0", mr: 1 }} />
+                    <Typography variant="h6" sx={{ fontWeight: 600, color: "#8470C0" }}>
+                      ລາຍລະອຽດການນັດຮັບ
+                    </Typography>
+                  </Box>
+
+                  <Divider sx={{ mb: 2 }} />
+
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} md={6}>
+                      <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                        <PetsIcon sx={{ color: "#666", mr: 1.5, fontSize: 20 }} />
+                        <Box>
+                          <Typography variant="body2" color="text.secondary">
+                            ຊື່ສັດລ້ຽງ
+                          </Typography>
+                          <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                            {meetUp?.pet?.petName || 'Unknown Pet'}
+                          </Typography>
+                        </Box>
+                      </Box>
+
+                      <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                        <LocationIcon sx={{ color: "#666", mr: 1.5, fontSize: 20 }} />
+                        <Box>
+                          <Typography variant="body2" color="text.secondary">
+                            ສະຖານທີ່ນັດພົບ
+                          </Typography>
+                          <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                            {meetUp.locationDetails}
+                          </Typography>
+                        </Box>
+                      </Box>
+
+                      <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                        <CalendarIcon sx={{ color: "#666", mr: 1.5, fontSize: 20 }} />
+                        <Box>
+                          <Typography variant="body2" color="text.secondary">
+                            ວັນທີ່ແລະເວລານັດຮັບ
+                          </Typography>
+                          <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                            {formatDate(meetUp.scheduledDateTime)}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Grid>
+
+                  </Grid>
+
+                  <Divider sx={{ my: 2 }} />
+
+                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">
+                        ສະຖານະປັດຈຸບັນ
+                      </Typography>
+                      <Chip
+                        label={meetUp.status}
+                        size="medium"
+                        color={
+                          meetUp.status === "PENDING"
+                            ? "primary"
+                            : meetUp.status === "APPROVED"
+                              ? "success"
+                              : "error"
+                        }
+                        sx={{
+                          bgcolor:
+                            meetUp.status === "PENDING"
+                              ? "rgba(132, 112, 192, 0.1)"
+                              : meetUp.status === "APPROVED"
+                                ? "rgba(76, 175, 80, 0.1)"
+                                : "rgba(244, 67, 54, 0.1)",
+                          color:
+                            meetUp.status === "PENDING"
+                              ? "#8470C0"
+                              : meetUp.status === "APPROVED"
+                                ? "#4caf50"
+                                : "#f44336",
+                          fontWeight: 600,
+                          borderRadius: "12px",
+                          fontSize: "0.8rem",
+                          height: "32px",
+                          mt: 1
+                        }}
+                      />
+                    </Box>
+
+                  </Box>
+                </CardContent>
+              </Card>
+            </Box>
+          </Collapse>
+        </TableCell>
+      </TableRow>
+    </>
+  );
+};
+
 const MeetUpsTable: React.FC = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
-  
+
   const [activeFilter, setActiveFilter] = useState<string>("all");
   const [meetUps, setMeetUps] = useState<AdoptionSchedule[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -73,100 +343,62 @@ const MeetUpsTable: React.FC = () => {
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<"error" | "warning" | "info" | "success">("error");
   const [fetchAttempts, setFetchAttempts] = useState<number>(0);
-  
-  
+
+
   // Handle snackbar close
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
   };
 
-  useEffect(() => {
-    fetchMeetUps();
-  }, [fetchAttempts]);
+
 
   const fetchMeetUps = async () => {
     try {
       setLoading(true);
-      
-      const response = await axiosInstance.get('/meet-up');
-      
-      console.log('API Response:', response);
-      
-      // Check if the response is valid
-      if (response.status === 200 && response.data) {
-        // Normalize data based on what's returned from the API
-        let meetupsData = response.data;
-        
-        // Handle different response structures
-        if (Array.isArray(response.data)) {
-          // If the response is directly an array of meet-ups
-          meetupsData = response.data;
-        } else if (response.data.data && Array.isArray(response.data.data)) {
-          // If the response has a data property that is an array
-          meetupsData = response.data.data;
-        } else if (typeof response.data === 'object' && !Array.isArray(response.data)) {
-          // If response is a single object, convert to array
-          meetupsData = [response.data];
-        }
-        
-        // Map the API response to match our AdoptionSchedule interface
-        const normalizedData = meetupsData.map((item: any) => ({
-          id: item.id || item._id || String(Math.random()),
-          petId: item.petId || item.pet || '',
-          locationDetails: item.locationDetails || item.location || '',
-          scheduledDateTime: item.scheduledDateTime || item.date || new Date().toISOString(),
-          status: (item.status || 'PENDING').toUpperCase(),
-          amount: item.amount || item.fee || 0,
-          attendees: item.attendees || 0,
-          createdAt: item.createdAt || new Date().toISOString(),
-          updatedAt: item.updatedAt || new Date().toISOString()
-        }));
-        
-        console.log('Normalized data:', normalizedData);
-        setMeetUps(normalizedData);
-        setSnackbarMessage("Data fetched successfully");
-        setSnackbarSeverity("success");
-        setSnackbarOpen(true);
+      setError(null);
+
+      const response = await axiosInstance.get<ApiResponse | AdoptionSchedule[]>('/meet-up/admin-meet-ups');
+
+      let meetupsData: AdoptionSchedule[] = [];
+
+      if (Array.isArray(response.data)) {
+        // Case: API returns array directly
+        meetupsData = response.data as AdoptionSchedule[];
+      } else if ('data' in response.data && Array.isArray(response.data.data)) {
+        // Case: API returns object with `data` array
+        meetupsData = response.data.data;
       } else {
-        throw new Error("Invalid response format");
+        throw new Error("Unexpected response format");
       }
-      
-      setLoading(false);
+
+      // Normalize data
+      const normalizedData: AdoptionSchedule[] = meetupsData.map((item) => ({
+        id: item.id || item?.id || String(Math.random()),
+        petId: item.petId || (item.pet as any)?.id || '',
+        pet: {
+          petName: (item.pet as any)?.petName || 'Unknown Pet'
+        },
+        locationDetails: item.locationDetails || '',
+        scheduledDateTime: item.scheduledDateTime || new Date().toISOString(),
+        status: (item.status || 'PENDING').toUpperCase(),
+        amount: item.amount || 0,
+        attendees: item.attendees || 0,
+        createdAt: item.createdAt || new Date().toISOString(),
+        updatedAt: item.updatedAt || new Date().toISOString(),
+      }));
+
+      setMeetUps(normalizedData);
+      setSnackbarMessage("Data fetched successfully");
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
     } catch (err: any) {
       console.error("Error fetching meet-ups:", err);
-      
-      // Fall back to sample data if API call fails
-      const sampleData = [
-        {
-          id: "sample-id-1",
-          petId: "P12345",
-          locationDetails: "Ban nongduang (frm 12), Vientiane, Laos",
-          scheduledDateTime: "2025-05-24T14:00:00.000Z",
-          status: 'PENDING',
-          amount: 25.00,
-          attendees: 8,
-          createdAt: "2025-04-24T18:55:20.433Z",
-          updatedAt: "2025-04-24T18:55:20.433Z"
-        },
-        {
-          id: "sample-id-2",
-          petId: "P67890",
-          locationDetails: "Mekong River Park, Vientiane",
-          scheduledDateTime: "2025-05-30T10:00:00.000Z",
-          status: 'APPROVED',
-          amount: 35.50,
-          attendees: 12,
-          createdAt: "2025-05-01T04:14:15.398Z",
-          updatedAt: "2025-05-01T04:14:15.398Z"
-        }
-      ];
-      
-      // Show error message but still display sample data for demonstration
+
       setError("Could not connect to API. Showing sample data.");
-      setMeetUps(sampleData);
       setSnackbarMessage("Error: " + (err.message || "Failed to fetch data"));
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
+    } finally {
       setLoading(false);
     }
   };
@@ -179,24 +411,6 @@ const MeetUpsTable: React.FC = () => {
   // Handle search input change
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
-  };
-
-  // Format date function
-  const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      return format(date, "dd MMM yyyy, HH:mm");
-    } catch (err) {
-      return dateString;
-    }
-  };
-
-  // Format currency function
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
   };
 
   // Filter meetups based on search term and active filter
@@ -235,11 +449,15 @@ const MeetUpsTable: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    fetchMeetUps();
+  }, [fetchAttempts]);
+
   return (
     <Container maxWidth="lg" sx={{ py: 3 }}>
-      <Card 
-        elevation={0} 
-        sx={{ 
+      <Card
+        elevation={0}
+        sx={{
           borderRadius: "16px",
           border: "1px solid rgba(0, 0, 0, 0.05)",
           overflow: "hidden",
@@ -248,11 +466,11 @@ const MeetUpsTable: React.FC = () => {
       >
         <CardContent sx={{ p: { xs: 2, md: 4 } }}>
           {/* Header section */}
-          <Box 
-            sx={{ 
-              display: "flex", 
+          <Box
+            sx={{
+              display: "flex",
               flexDirection: { xs: "column", sm: "row" },
-              justifyContent: "space-between", 
+              justifyContent: "space-between",
               alignItems: { xs: "flex-start", sm: "center" },
               mb: 3,
               gap: 2
@@ -260,35 +478,35 @@ const MeetUpsTable: React.FC = () => {
           >
             <Box>
               <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-                <GroupsIcon 
-                  sx={{ 
-                    color: "#8470C0", 
+                <GroupsIcon
+                  sx={{
+                    color: "#8470C0",
                     mr: 1,
                     fontSize: 28
-                  }} 
+                  }}
                 />
-                <Typography 
-                  variant="h5" 
-                  sx={{ 
-                    fontWeight: 700, 
-                    color: "#444" 
+                <Typography
+                  variant="h5"
+                  sx={{
+                    fontWeight: 700,
+                    color: "#444"
                   }}
                 >
-                  ປະຫວັດການຂຊື້ຂາຍ
+                  ປະຫວັດການຊື້ຂາຍ
                 </Typography>
               </Box>
-              <Typography 
-                variant="body2" 
+              <Typography
+                variant="body2"
                 color="text.secondary"
                 sx={{ maxWidth: 500 }}
               >
-                  ທ່ານສາມາດເບິ່ງ ແລະ ຈັດການການນັດພົບສັດລ້ຽງຂອງທ່ານທີ່ໄດ້ກຳນົດໄວ້.
+                ທ່ານສາມາດເບິ່ງ ແລະ ຈັດການການນັດພົບສັດລ້ຽງຂອງທ່ານທີ່ໄດ້ກຳນົດໄວ້. ກົດແຖວເພື່ອເບິ່ງລາຍລະອຽດ.
               </Typography>
             </Box>
 
-            <Box 
-              sx={{ 
-                display: "flex", 
+            <Box
+              sx={{
+                display: "flex",
                 gap: 1,
                 width: { xs: "100%", sm: "auto" }
               }}
@@ -305,7 +523,7 @@ const MeetUpsTable: React.FC = () => {
                       <SearchIcon fontSize="small" sx={{ color: "action.active" }} />
                     </InputAdornment>
                   ),
-                  sx: { 
+                  sx: {
                     borderRadius: "12px",
                     bgcolor: "#f5f5f5",
                     '& .MuiOutlinedInput-notchedOutline': {
@@ -362,9 +580,9 @@ const MeetUpsTable: React.FC = () => {
           {error ? (
             <Box sx={{ textAlign: 'center', py: 4 }}>
               <Typography color="error">{error}</Typography>
-              <Button 
-                variant="contained" 
-                sx={{ 
+              <Button
+                variant="contained"
+                sx={{
                   mt: 2,
                   bgcolor: "#8470C0",
                   '&:hover': {
@@ -387,10 +605,10 @@ const MeetUpsTable: React.FC = () => {
               <CircularProgress sx={{ color: "#8470C0" }} />
             </Box>
           ) : (
-            <TableContainer 
-              component={Paper} 
-              elevation={0} 
-              sx={{ 
+            <TableContainer
+              component={Paper}
+              elevation={0}
+              sx={{
                 mb: 3,
                 borderRadius: "12px",
                 overflow: "hidden",
@@ -400,158 +618,67 @@ const MeetUpsTable: React.FC = () => {
               <Table>
                 <TableHead>
                   <TableRow sx={{ bgcolor: "rgba(132, 112, 192, 0.05)" }}>
-                    <TableCell 
-                      sx={{ 
-                        color: "#555", 
+                    <TableCell
+                      sx={{
+                        color: "#555",
                         fontWeight: 600,
                         fontSize: "0.875rem"
                       }}
                     >
                       <Box sx={{ display: "flex", alignItems: "center" }}>
-                       ສັດລ້ຽງ
+                        ສັດລ້ຽງ
                         <SortIcon fontSize="small" sx={{ ml: 0.5, color: "action.active" }} />
                       </Box>
                     </TableCell>
-                    <TableCell 
-                      sx={{ 
-                        color: "#555", 
+                    <TableCell
+                      sx={{
+                        color: "#555",
                         fontWeight: 600,
-                        fontSize: "0.875rem" 
+                        fontSize: "0.875rem"
                       }}
                     >
                       ສະຖານທີນັດພົບ
                     </TableCell>
-                    <TableCell 
-                      sx={{ 
-                        color: "#555", 
+                    <TableCell
+                      sx={{
+                        color: "#555",
                         fontWeight: 600,
-                        fontSize: "0.875rem" 
+                        fontSize: "0.875rem"
                       }}
                     >
-                     ເວລານັດຮັບ
+                      ເວລານັດຮັບ
                     </TableCell>
-                    <TableCell 
-                      sx={{ 
-                        color: "#555", 
+                    <TableCell
+                      sx={{
+                        color: "#555",
                         fontWeight: 600,
-                        fontSize: "0.875rem" 
+                        fontSize: "0.875rem"
                       }}
                     >
                       ສະຖານະ
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        color: "#555",
+                        fontWeight: 600,
+                        fontSize: "0.875rem",
+                        width: "60px"
+                      }}
+                    >
+                      ລາຍລະອຽດ
                     </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {filteredMeetUps.length > 0 ? (
                     filteredMeetUps.map((meetUp) => (
-                      <TableRow
-                        key={meetUp.id || meetUp.petId}
-                        sx={{ 
-                          transition: "all 0.2s",
-                          "&:hover": { 
-                            bgcolor: "rgba(132, 112, 192, 0.05)"
-                          }
-                        }}
-                      >
-                        <TableCell sx={{ fontWeight: 600, color: "#8470C0" }}>
-                          <Box sx={{ display: "flex", alignItems: "center" }}>
-                            <Avatar
-                              sx={{ 
-                                width: 36, 
-                                height: 36, 
-                                mr: 1.5,
-                                border: "2px solid #f0f0f0",
-                                bgcolor: "#8470C0"
-                              }}
-                            >
-                              <PetsIcon fontSize="small" />
-                            </Avatar>
-                            <Typography 
-                              variant="body2" 
-                              sx={{ 
-                                fontWeight: 600,
-                                maxWidth: "180px",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap"
-                              }}
-                            >
-                              {meetUp.petId}
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Box sx={{ display: "flex", alignItems: "center" }}>
-                            <LocationIcon 
-                              fontSize="small" 
-                              sx={{ color: "#666", mr: 1 }} 
-                            />
-                            <Typography 
-                              variant="body2" 
-                              sx={{ 
-                                color: "#666",
-                                maxWidth: "120px",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap"
-                              }}
-                            >
-                              {meetUp.locationDetails}
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Box sx={{ display: "flex", alignItems: "center" }}>
-                            <CalendarIcon 
-                              fontSize="small" 
-                              sx={{ color: "#666", mr: 1 }} 
-                            />
-                            <Typography 
-                              variant="body2" 
-                              sx={{ color: "#666" }}
-                            >
-                              {formatDate(meetUp.scheduledDateTime)}
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={meetUp.status}
-                            size="small"
-                            color={
-                              meetUp.status === "PENDING" 
-                                ? "primary" 
-                                : meetUp.status === "APPROVED" 
-                                  ? "success" 
-                                  : "error"
-                            }
-                            sx={{
-                              bgcolor: 
-                                meetUp.status === "PENDING" 
-                                  ? "rgba(132, 112, 192, 0.1)" 
-                                  : meetUp.status === "APPROVED" 
-                                    ? "rgba(76, 175, 80, 0.1)" 
-                                    : "rgba(244, 67, 54, 0.1)",
-                              color: 
-                                meetUp.status === "PENDING" 
-                                  ? "#8470C0" 
-                                  : meetUp.status === "APPROVED" 
-                                    ? "#4caf50" 
-                                    : "#f44336",
-                              fontWeight: 500,
-                              borderRadius: "12px",
-                              fontSize: "0.75rem",
-                              height: "24px"
-                            }}
-                          />
-                        </TableCell>
-                      </TableRow>
+                      <ExpandableRow key={meetUp.id || meetUp.petId} meetUp={meetUp} />
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={6} sx={{ textAlign: "center", py: 4 }}>
+                      <TableCell colSpan={5} sx={{ textAlign: "center", py: 4 }}>
                         <Typography variant="body1" color="text.secondary">
-                         ຍັງບໍ່ມີການນັດຮັບເທື່ອ
+                          ຍັງບໍ່ມີການນັດຮັບເທື່ອ
                         </Typography>
                       </TableCell>
                     </TableRow>
@@ -564,9 +691,9 @@ const MeetUpsTable: React.FC = () => {
 
           {/* Footer with pagination */}
           {!loading && !error && filteredMeetUps.length > 0 && (
-            <Box 
-              sx={{ 
-                display: "flex", 
+            <Box
+              sx={{
+                display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
                 flexWrap: "wrap",
@@ -576,9 +703,9 @@ const MeetUpsTable: React.FC = () => {
               <Typography variant="body2" color="text.secondary">
                 ສະແດງ {filteredMeetUps.length} of {meetUps.length} ການນັດຮັບ
               </Typography>
-              
-              <Box 
-                sx={{ 
+
+              <Box
+                sx={{
                   display: "flex",
                   gap: 1
                 }}
@@ -599,7 +726,7 @@ const MeetUpsTable: React.FC = () => {
                     }
                   }}
                 >
-                 ຍ້ອນກັບ
+                  ຍ້ອນກັບ
                 </Button>
                 <Button
                   variant="contained"
@@ -637,17 +764,17 @@ const MeetUpsTable: React.FC = () => {
           )}
         </CardContent>
       </Card>
-      
+
       {/* Snackbar for notifications */}
-      <Snackbar 
-        open={snackbarOpen} 
-        autoHideDuration={6000} 
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
         onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert 
-          onClose={handleSnackbarClose} 
-          severity={snackbarSeverity} 
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbarSeverity}
           sx={{ width: '100%' }}
         >
           {snackbarMessage}

@@ -111,6 +111,7 @@ interface MeetupDetails {
   requesterId: string;
   status?: "PENDING" | "ACCEPTED" | "COMPLETED" | "RECEIVED";
   meetupId?: string;
+  link?: string;
 }
 
 interface UserInfo {
@@ -122,6 +123,7 @@ interface UserInfo {
 }
 
 interface IncomingMeetup {
+  isMeetUp: boolean;
   id: string;
   adoptId: string | null;
   petId: string;
@@ -185,6 +187,7 @@ interface IncomingMeetup {
 
 interface MeetupRequest {
   id: string;
+  isMeetup?: boolean;
   fullName: string;
   link: string;
   dateOfRequest: string;
@@ -354,7 +357,9 @@ const MeetupManagementTable: React.FC = () => {
             scheduledDateTime: new Date(meetup.scheduledDateTime).toLocaleString(),
             locationDetails: meetup.locationDetails,
             link: meetup.link || "",
-            otherUserInfo: otherUserInfo, // Seller info for buyer tab
+            otherUserInfo: otherUserInfo, // Seller info for buyer 
+            isMeetup: true
+
           };
 
           console.log("Transformed buyer request:", transformedRequest);
@@ -1083,168 +1088,144 @@ const MeetupManagementTable: React.FC = () => {
             {/* MEETUP BUTTONS */}
             <Grid item xs={12}>
               <Divider sx={{ my: 1 }} />
-              <Stack
-                direction="row"
-                spacing={2}
-                alignItems="center"
-                flexWrap="wrap"
+              <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
+  {activeTab === "buyer" && (
+    <>
+      {/* PENDING STATUS */}
+      {request.meetupStatus === "PENDING" && (
+        <>
+          <Chip
+            icon={<PendingIcon />}
+            label={
+              isCurrentUserMeetupRequester(request)
+                ? "ຖ້າການຍອມຮັບ"
+                : "ຄຳຮ້ອງຂໍນັດພົບໄດ້ຮັບແລ້ວ"
+            }
+            color="warning"
+            sx={{ mt: 1 }}
+          />
+
+          {!isCurrentUserMeetupRequester(request) && (
+            <>
+              <Button
+                variant="contained"
+                color="success"
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  handleAcceptMeetup(request.id, request.meetupId);
+                }}
+                sx={{
+                  borderRadius: 2,
+                  bgcolor: "#28a745",
+                  "&:hover": { bgcolor: "#218838" },
+                }}
               >
-                {/* PENDING STATUS - Show Accept/Reject buttons */}
-                {request.meetupStatus === "PENDING" && (
-                  <>
-                    <Chip
-                      icon={<PendingIcon />}
-                      label={
-                        isCurrentUserMeetupRequester(request)
-                          ? "ຖ້າການຍອມຮັບ"
-                          : "ຄຳຮ້ອງຂໍນັດພົບໄດ້ຮັບແລ້ວ"
-                      }
-                      color="warning"
-                      sx={{ mt: 1 }}
-                    />
+                ຢືນຢັນການນັດ
+              </Button>
 
-                    {!isCurrentUserMeetupRequester(request) && (
-                      <>
-                        <Button
-                          variant="contained"
-                          color="success"
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            console.log(
-                              "Accept button clicked for:",
-                              request.id,
-                              request.meetupId
-                            );
-                            handleAcceptMeetup(request.id, request.meetupId);
-                          }}
-                          sx={{
-                            borderRadius: 2,
-                            bgcolor: "#28a745",
-                            "&:hover": { bgcolor: "#218838" },
-                          }}
-                        >
-                          ຢືນຢັນການນັດ
-                        </Button>
+              <Button
+                variant="outlined"
+                color="error"
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  handleRejectMeetup(request.id, request.meetupId);
+                }}
+                sx={{ borderRadius: 2 }}
+              >
+                ປະຕິເສດການນັດ
+              </Button>
+            </>
+          )}
 
-                        <Button
-                          variant="outlined"
-                          color="error"
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            console.log(
-                              "Reject button clicked for:",
-                              request.id,
-                              request.meetupId
-                            );
-                            handleRejectMeetup(request.id, request.meetupId);
-                          }}
-                          sx={{ borderRadius: 2 }}
-                        >
-                          ປະຕິເສດການນັດ
-                        </Button>
-                      </>
-                    )}
+          {isCurrentUserMeetupRequester(request) && (
+            <Button
+              variant="outlined"
+              color="error"
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                handleCancelMeetup(request.id, request.meetupId);
+              }}
+              sx={{ borderRadius: 2 }}
+            >
+              ຍົກເລີກການນັດ
+            </Button>
+          )}
+        </>
+      )}
 
-                    {isCurrentUserMeetupRequester(request) && (
-                      <Button
-                        variant="outlined"
-                        color="error"
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                          console.log(
-                            "Cancel button clicked for:",
-                            request.id,
-                            request.meetupId
-                          );
-                          handleCancelMeetup(request.id, request.meetupId);
-                        }}
-                        sx={{ borderRadius: 2 }}
-                      >
-                        ຍົກເລີກການນັດ
-                      </Button>
-                    )}
-                  </>
-                )}
+      {/* ACCEPTED STATUS */}
+     {request.meetupStatus === "ACCEPTED" && activeTab === "buyer" && (
+  <Button
+    variant="contained"
+    color="primary"
+    size="small"
+    onClick={(e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      handleConfirmRECEIVED(request.id, request.meetupId);
+    }}
+    sx={{
+      borderRadius: 2,
+      mb: 3,
+      bgcolor: "#6c63ff",
+      "&:hover": { bgcolor: "#5a54d9" },
+    }}
+    startIcon={<VerifiedUserIcon />}
+  >
+    ຢືນຢັນວ່າໄດ້ຮັບສັດແລ້ວ
+  </Button>
+)}
 
-                {/* ACCEPTED STATUS - Show Confirm RECEIVED button */}
-                {request.meetupStatus === "ACCEPTED" && (
-                  <>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        console.log(
-                          "Confirm RECEIVED button clicked for:",
-                          request.id,
-                          request.meetupId
-                        );
-                        handleConfirmRECEIVED(request.id, request.meetupId);
-                      }}
-                      sx={{
-                        borderRadius: 2,
-                        mb: 3,
-                        bgcolor: "#6c63ff",
-                        "&:hover": { bgcolor: "#5a54d9" },
-                      }}
-                      startIcon={<VerifiedUserIcon />}
-                    >
-                      ຢືນຢັນວ່າໄດ້ຮັບສັດແລ້ວ
-                    </Button>
-                  </>
-                )}
+      {/* REJECTED STATUS */}
+      {request.meetupStatus === "REJECTED" && (
+        <Chip
+          icon={<CancelIcon />}
+          label="Meetup Rejected"
+          color="error"
+          sx={{ mt: 1 }}
+        />
+      )}
 
-                {/* REJECTED STATUS */}
-                {request.meetupStatus === "REJECTED" && (
-                  <Chip
-                    icon={<CancelIcon />}
-                    label="Meetup Rejected"
-                    color="error"
-                    sx={{ mt: 1 }}
-                  />
-                )}
+      {/* RECEIVED STATUS */}
+      {request.meetupStatus === "RECEIVED" && !request.adoptionStatus && (
+        <>
+          <Chip
+            icon={<VerifiedUserIcon />}
+            label="Meetup Completed"
+            color="success"
+            sx={{ mt: 1, bgcolor: "#28a745", color: "white" }}
+          />
 
-                {/* RECEIVED STATUS - Meetup completed */}
-                {request.meetupStatus === "RECEIVED" &&
-                  !request.adoptionStatus && (
-                    <>
-                      <Chip
-                        icon={<VerifiedUserIcon />}
-                        label="Meetup Completed"
-                        color="success"
-                        sx={{ mt: 1, bgcolor: "#28a745", color: "white" }}
-                      />
+          {activeTab === "buyer" && (
+            <Typography
+              color="text.secondary"
+              variant="body2"
+              sx={{ mt: 1 }}
+            >
+              Waiting for pet owner to finalize adoption...
+            </Typography>
+          )}
+        </>
+      )}
 
-                      {activeTab === "buyer" && (
-                        <Typography
-                          color="text.secondary"
-                          variant="body2"
-                          sx={{ mt: 1 }}
-                        >
-                          Waiting for pet owner to finalize adoption...
-                        </Typography>
-                      )}
-                    </>
-                  )}
-
-                {/* COMPLETED ADOPTION */}
-                {request.adoptionStatus === "COMPLETED" && (
-                  <Chip
-                    icon={<CelebrationIcon />}
-                    label="Adoption Completed!"
-                    color="success"
-                    sx={{ mt: 1, bgcolor: "#28a745", color: "white" }}
-                  />
-                )}
-              </Stack>
+      {/* COMPLETED ADOPTION */}
+      {request.adoptionStatus === "COMPLETED" && (
+        <Chip
+          icon={<CelebrationIcon />}
+          label="Adoption Completed!"
+          color="success"
+          sx={{ mt: 1, bgcolor: "#28a745", color: "white" }}
+        />
+      )}
+    </>
+  )}
+</Stack>
             </Grid>
           </Grid>
         </CardContent>
@@ -1282,8 +1263,8 @@ const MeetupManagementTable: React.FC = () => {
               },
             }}
           >
-            <Tab label="ຜູ້ຊີ້" value="buyer" />
-            <Tab label="ຜູ້ຂາຍ" value="seller" />
+            <Tab label="ຮັບນັດພົບ" value="buyer" />
+            <Tab label="ສົ່ງນັດພົບ" value="seller" />
             
           </Tabs>
         </Box>

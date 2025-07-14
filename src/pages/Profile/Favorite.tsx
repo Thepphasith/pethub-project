@@ -1022,26 +1022,10 @@ const FavoritesPage = () => {
                               </Box>
                             )}
 
-                            <Box sx={{ mt: "auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <Box sx={{ mt: "auto", display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
                               <Typography variant="caption" color="text.secondary">
                                 Saved on: {formatDate(blog.createdAt)}
                               </Typography>
-                              <Button
-                                variant="text"
-                                size="small"
-                                component={Link}
-                                to={`/blog/${blog.id}`}
-                                endIcon={<NavigateNextIcon />}
-                                sx={{
-                                  color: "#9990DA",
-                                  fontWeight: 600,
-                                  "&:hover": {
-                                    backgroundColor: "rgba(153, 144, 218, 0.08)",
-                                  },
-                                }}
-                              >
-                                ອ່ານເພີ່ມເຕີມ
-                              </Button>
                             </Box>
                           </Box>
                         </CardContent>

@@ -72,7 +72,7 @@ interface HouseDetails {
   otherPets: boolean;
   otherPetsDetails: string;
   paymentId: string | null;
-  hasMeetup?: boolean; // Add this to track if meet-up exists
+  isMeetUp?: boolean; // Add this to track if meet-up exists
   pet?: {
     id: string;
     userId: string;
@@ -117,7 +117,8 @@ interface AdoptionRequest {
   paymentStatus: "PAID" | "UNPAID";
   petId: string;
   userId?: string;
-  hasMeetup?: boolean; // Add this to track meet-up status
+
+  isMeetUp?: boolean;
 }
 
 // Interface for animal details to pass to payment dialog
@@ -181,7 +182,7 @@ const AdoptionRequestsTable: React.FC = () => {
     fetchCurrentUser();
   }, []);
 
-  const fetchAdoptionData = async () => {
+ const fetchAdoptionData = async () => {
     try {
       setLoading(true);
       const response = await axiosInstance.get("/adopt");
@@ -228,7 +229,7 @@ const AdoptionRequestsTable: React.FC = () => {
           originalData: item,
           isOwnedByCurrentUser,
           paymentStatus: hasPayment ? "PAID" : "UNPAID",
-          hasMeetup: item.hasMeetup || false, // Add meet-up status from API
+          isMeetUp: item.isMeetUp || false, // Get isMeetUp from API
         };
       });
 
@@ -240,6 +241,7 @@ const AdoptionRequestsTable: React.FC = () => {
       setLoading(false);
     }
   };
+
 
   // Fetch adoption data
   useEffect(() => {
@@ -325,7 +327,7 @@ const AdoptionRequestsTable: React.FC = () => {
       setAdoptionRequests(prev =>
         prev.map(request =>
           request.id === selectedMeetupRequest.id
-            ? { ...request, hasMeetup: true }
+            ? { ...request, isMeetUp: true }
             : request
         )
       );
@@ -558,7 +560,7 @@ const AdoptionRequestsTable: React.FC = () => {
 
   return (
     <>
-      <Paper sx={{ width: "100%", overflow: "hidden", borderRadius: 2 }}>
+     <Paper sx={{ width: "100%", overflow: "hidden", borderRadius: 2 }}>
         <Box
           sx={{
             display: "flex",
@@ -897,79 +899,80 @@ const AdoptionRequestsTable: React.FC = () => {
                                             request.originalData.paymentId ? (
                                               // Show meet-up button after payment is completed
                                               <>
-                                                {!request.hasMeetup ? (
-                                                  <Button
-                                                    variant="contained"
-                                                    color="secondary"
-                                                    size="medium"
-                                                    startIcon={<EventIcon />}
-                                                    onClick={() => handleMeetup(request)}
-                                                    sx={{
-                                                      backgroundColor: "#ff9800",
-                                                      borderRadius: 2,
-                                                      boxShadow: "0 4px 10px rgba(255, 152, 0, 0.3)",
-                                                      minWidth: 150,
-                                                      mx: 1,
-                                                      "&:hover": {
-                                                        backgroundColor: "#f57c00",
-                                                      },
-                                                    }}
-                                                  >
-                                                    ນັດພົບ
-                                                  </Button>
-                                                ) : (
-                                                  <Typography
-                                                    color="info.main"
-                                                    fontWeight="medium"
-                                                    sx={{
-                                                      display: "flex",
-                                                      alignItems: "center",
-                                                      p: 2,
-                                                      bgcolor: "#e3f2fd",
-                                                      borderRadius: 2,
-                                                    }}
-                                                  >
-                                                    <EventIcon fontSize="small" sx={{ mr: 1 }} />
-                                                    ການນັດພົບໄດ້ຖືກຈັດແລ້ວ - ລໍຖ້າການສໍາເລັດການຮັບລ້ຽງ
-                                                  </Typography>
-                                                )}
-                                              </>
-                                            ) : (
-                                              <>
-                                                <Button
-                                                  variant="contained"
-                                                  color="primary"
-                                                  size="medium"
-                                                  onClick={() => handlePay(request)}
-                                                  sx={{
-                                                    backgroundColor: "#6c63ff",
-                                                    borderRadius: 2,
-                                                    boxShadow: "0 4px 10px rgba(108, 99, 255, 0.3)",
-                                                    minWidth: 100,
-                                                    mx: 1,
-                                                  }}
-                                                >
-                                                  ຈ່າຍເງິນ
-                                                </Button>
-                                                <Button
-                                                  variant="outlined"
-                                                  color="primary"
-                                                  size="medium"
-                                                  onClick={() => handleCancel(request.id)}
-                                                  sx={{
-                                                    color: "#6c63ff",
-                                                    borderColor: "#6c63ff",
-                                                    borderRadius: 2,
-                                                    minWidth: 100,
-                                                    mx: 1,
-                                                  }}
-                                                >
-                                                  ຍົກເລີກ
-                                                </Button>
-                                              </>
-                                            )}
-                                          </>
-                                        )}
+                                                 {!request.isMeetUp ? (
+          <Button
+            variant="contained"
+            color="secondary"
+            size="medium"
+            startIcon={<EventIcon />}
+            onClick={() => handleMeetup(request)}
+            sx={{
+              backgroundColor: "#ff9800",
+              borderRadius: 2,
+              boxShadow: "0 4px 10px rgba(255, 152, 0, 0.3)",
+              minWidth: 150,
+              mx: 1,
+              "&:hover": {
+                backgroundColor: "#f57c00",
+              },
+            }}
+          >
+            ນັດພົບ
+          </Button>
+        ) : (
+          <Typography
+            color="info.main"
+            fontWeight="medium"
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              p: 2,
+              bgcolor: "#e3f2fd",
+              borderRadius: 2,
+            }}
+          >
+            <EventIcon fontSize="small" sx={{ mr: 1 }} />
+            ການນັດພົບໄດ້ຖືກຈັດແລ້ວ - ລໍຖ້າການສໍາເລັດການຮັບລ້ຽງ
+          </Typography>
+        )}
+      </>
+    ) : (
+      // Payment buttons if not paid yet
+      <>
+        <Button
+          variant="contained"
+          color="primary"
+          size="medium"
+          onClick={() => handlePay(request)}
+          sx={{
+            backgroundColor: "#6c63ff",
+            borderRadius: 2,
+            boxShadow: "0 4px 10px rgba(108, 99, 255, 0.3)",
+            minWidth: 100,
+            mx: 1,
+          }}
+        >
+          ຈ່າຍເງິນ
+        </Button>
+        <Button
+          variant="outlined"
+          color="primary"
+          size="medium"
+          onClick={() => handleCancel(request.id)}
+          sx={{
+            color: "#6c63ff",
+            borderColor: "#6c63ff",
+            borderRadius: 2,
+            minWidth: 100,
+            mx: 1,
+          }}
+        >
+          ຍົກເລີກ
+        </Button>
+      </>
+    )}
+  </>
+)}
                                         {request.status === "PENDING" && (
                                           <Typography color="text.secondary" fontStyle="italic">
                                             ລໍຖ້າການຢືນຢັນຈາກເຈົ້າຂອງສັດລ້ຽງ...
@@ -1015,50 +1018,50 @@ const AdoptionRequestsTable: React.FC = () => {
                                             request.originalData.paymentId ? (
                                               // Show meet-up button after payment is completed (for seller)
                                               <>
-                                                {!request.hasMeetup ? (
-                                                  <Button
-                                                    variant="contained"
-                                                    color="secondary"
-                                                    size="medium"
-                                                    startIcon={<EventIcon />}
-                                                    onClick={() => handleMeetup(request)}
-                                                    sx={{
-                                                      backgroundColor: "#ff9800",
-                                                      borderRadius: 2,
-                                                      boxShadow: "0 4px 10px rgba(255, 152, 0, 0.3)",
-                                                      minWidth: 150,
-                                                      mx: 1,
-                                                      "&:hover": {
-                                                        backgroundColor: "#f57c00",
-                                                      },
-                                                    }}
-                                                  >
-                                                    ນັດພົບ
-                                                  </Button>
-                                                ) : (
-                                                  <Typography
-                                                    color="info.main"
-                                                    fontWeight="medium"
-                                                    sx={{
-                                                      display: "flex",
-                                                      alignItems: "center",
-                                                      p: 2,
-                                                      bgcolor: "#e3f2fd",
-                                                      borderRadius: 2,
-                                                    }}
-                                                  >
-                                                    <EventIcon fontSize="small" sx={{ mr: 1 }} />
-                                                    ການນັດພົບໄດ້ຖືກຈັດແລ້ວ - ລໍຖ້າການສໍາເລັດການຮັບລ້ຽງ
-                                                  </Typography>
-                                                )}
-                                              </>
-                                            ) : (
-                                              <Typography color="text.secondary" fontStyle="italic">
-                                                ລໍຖ້າການຈ່າຍເງິນຈາກຜູ້ຊື້...
-                                              </Typography>
-                                            )}
-                                          </>
-                                        )}
+                                                {!request.isMeetUp ? (
+          <Button
+            variant="contained"
+            color="secondary"
+            size="medium"
+            startIcon={<EventIcon />}
+            onClick={() => handleMeetup(request)}
+            sx={{
+              backgroundColor: "#ff9800",
+              borderRadius: 2,
+              boxShadow: "0 4px 10px rgba(255, 152, 0, 0.3)",
+              minWidth: 150,
+              mx: 1,
+              "&:hover": {
+                backgroundColor: "#f57c00",
+              },
+            }}
+          >
+            ນັດພົບ
+          </Button>
+        ) : (
+          <Typography
+            color="info.main"
+            fontWeight="medium"
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              p: 2,
+              bgcolor: "#e3f2fd",
+              borderRadius: 2,
+            }}
+          >
+            <EventIcon fontSize="small" sx={{ mr: 1 }} />
+            ການນັດພົບໄດ້ຖືກຈັດແລ້ວ - ລໍຖ້າການສໍາເລັດການຮັບລ້ຽງ
+          </Typography>
+        )}
+      </>
+    ) : (
+      <Typography color="text.secondary" fontStyle="italic">
+        ລໍຖ້າການຈ່າຍເງິນຈາກຜູ້ຊື້...
+      </Typography>
+    )}
+  </>
+)}
                                       </>
                                     )}
                                   </Box>
